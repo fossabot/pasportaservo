@@ -6,6 +6,7 @@ from django import template
 from django.conf import settings
 from django.http import HttpRequest
 from django.utils.safestring import SafeData, mark_safe
+from django.utils.translation import get_language_from_request
 
 from core.utils import sanitize_next
 
@@ -104,6 +105,13 @@ def compact(value):
     new lines) are replaced by a space and collapsed.
     """
     return ' '.join(value.split())
+
+
+@register.simple_tag(takes_context=True)
+def get_user_language(context):
+    if 'request' not in context:
+        return settings.LANGUAGE_CODE
+    return get_language_from_request(context['request'])
 
 
 @register.simple_tag(name='next', takes_context=True)

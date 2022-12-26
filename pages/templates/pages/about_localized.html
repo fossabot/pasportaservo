@@ -1,0 +1,66 @@
+{% extends 'core/base.html' %}
+{% load i18n flatpages %}
+{% load variable utils %}
+
+{% block head_title %}{{ flatpage.title }}{% endblock %}
+{% block head_title_separator %}:{% endblock %}
+
+{% block page_class %} page{% endblock %}
+
+{% block page %}
+    User's lang: {% get_user_language as user_locale %} {{ user_locale }} ({% get_current_language as LANGUAGE_CODE %}{{ LANGUAGE_CODE }}) <br />
+    {% get_flatpages '/pri-ni/' as about_pages %}
+    {{ about_pages }} <br />
+
+    {% if user_locale == 'en' %}
+        {# 'en' is often the default in browsers, that users don't modify #}
+        {% asvar user_locale %}{{ LANGUAGE_CODE }}{% endasvar %}
+    {% endif %}
+    {% asvar current_page_lang trimmed %}
+        {{ flatpage.url|split:"/"|slice:"2:3"|first }}
+    {% endasvar %}
+
+    <form class="form-inline" action="{% url 'about' %}" method="post" {% if current_page_lang|language_bidi %}dir="rtl"{% endif %}
+          style="text-align: {{ current_page_lang|language_bidi|yesno:"left,right" }}">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="control-label" for="id_lang_switcher">W innym języku:</label>
+            <select id="id_lang_switcher" class="form-control" style="margin-left: 0.5em; margin-right: 0.5em;" autocomplete="off">
+            {% language user_locale %}
+                {% filter compact %}
+                <option value="{% url 'about' %}">
+                    {{ LANGUAGE_CODE|language_name_local|capfirst }}
+                    {% if LANGUAGE_CODE|language_name_local|lower != LANGUAGE_CODE|language_name_translated|lower %}
+                        &bull; {{ LANGUAGE_CODE|language_name_translated }}
+                    {% endif %}
+                </option>
+                {% endfilter %}
+                {% for about_page in about_pages %}
+                    {% filter compact %}
+                    <option{% if flatpage.url == about_page.url %} selected{% endif %} value="{{ about_page.url }}">
+                        {% asvar page_lang trimmed %}
+                            {# Each localized about page should have a URL in the form: #}
+                            {# /pri-ni/LANG-CODE/local-slug/ #}
+                            {{ about_page.url|split:"/"|slice:"2:3"|first }}
+                        {% endasvar %}
+                        {{ page_lang }} :
+                        {{ page_lang|language_name_local|capfirst }}
+                        {% if page_lang|language_name_local|lower != page_lang|language_name_translated|lower %}
+                            &bull; {{ page_lang|language_name_translated }}
+                        {% endif %}
+                    </option>
+                    {% endfilter %}
+                {% endfor %}
+            {% endlanguage %}
+            </select>
+        </div>
+        <button type="submit" class="btn btn-default">
+            <span class="fa fa-solid fa-angles-{{ current_page_lang|language_bidi|yesno:"left,right" }}" aria-hidden="true"></span>
+            <span class="sr-only">{{ current_page_lang|language_bidi|yesno:"&gt;,&lt;"|safe }}</span>
+        </button>
+    </form>
+
+    {# <hr /> #}
+
+    {{ flatpage.content }}
+{% endblock page %}

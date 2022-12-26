@@ -179,6 +179,7 @@
         {% if result.point %}
             <p class="lead">
                 {{ result|format_geo_result }}
+                [Country: {{ view.country_search }}, Locality: {{ view.inhabited_place_search }}]
             </p>
             <p class="maplink hidden-print">
                 <a href="{% url 'world_map' %}{{ result|geo_url_hash }}">{% trans "Open map of the region" %}</a>
@@ -220,6 +221,30 @@
 
     {% if place_list_not_empty %}
         <div class="row place-list"><div class="col-xs-12">{# SEPARATOR #}</div></div>
+        <div class="row place-list">
+            <div class="col-xs-12 text-right">
+                {% if user.is_authenticated and view.query and view.result.point and country_results_count|default:500 > 3.10 %}
+                    {% comment %}
+                        The precise number of places is only known for countries. In other cases, we load
+                        additional places dynamically, sorted by distance – thus, we can assume there are
+                        "numerous" results.
+                    {% endcomment %}
+                    <span class="help-block" style="margin: 0">
+                        {% if country_results_count %}
+                            {% blocktrans with number=country_results_count trimmed %}
+                                {{ number }} rezultoj entute.
+                            {% endblocktrans %}
+                        {% else %}
+                            {% trans "Tro da rezultoj?" %}
+                        {% endif %}
+                        <a href="#advanced-filter" {# data-toggle="collapse" #} id="advanced_filter_toggle"
+                            aria-controls="advanced-filter"
+                            aria-expanded="{{ filtered_by|yesno:'true,false' }}">Pliprecizigu la sercxadon</a>.
+                    </span>
+                {% endif %}
+            </div>
+        </div>
+        {# SEPARATOR #}
         {% include page_template %}
     {% else %}
         <div class="row place-list">

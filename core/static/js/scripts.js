@@ -365,6 +365,14 @@ $(document).ready(function() {
         $('[data-target="#map-container"]').toggleClass('active');
     });
 
+    // Advanced search panel
+    $('#advanced_filter_toggle').click(function() {
+        $('#advanced-filter').collapse("show").focus();
+    });
+    $('#advanced-filter').on('shown.bs.collapse, hidden.bs.collapse', function(event) {
+        console.log()
+    });
+
     // Sortable lists (via drag-and-drop)
     if (typeof Sortable !== "undefined") {
         $('.phone-list').each(function() {

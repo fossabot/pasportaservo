@@ -263,6 +263,7 @@ class SearchView(PlacePaginatedListView):
                 self.result.city,
                 point_category == 'place' and point_type and point_type != 'country',
             ]
+            print(self.result.country, self.result.country_code, locality_found_flags)
             if any(locality_found_flags):
                 self.inhabited_place_search = point_category == 'place'
                 search_queryset = (
@@ -325,6 +326,7 @@ class SearchView(PlacePaginatedListView):
         context['feedback_form'] = FeedbackForm()
 
         if getattr(self, 'country_search', False) and hasattr(self, 'result') and self.result.country_code:
+            context['country_results_count'] = context['object_list'].count()
             context['country_advisories'] = TravelAdvice.get_for_country(self.result.country_code.upper())
 
         return context

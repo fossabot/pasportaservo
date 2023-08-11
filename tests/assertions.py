@@ -59,6 +59,27 @@ class AdditionalAsserts:
         else:
             super().assertEqual(obj1, obj2, msg=msg)
 
+    def assertLength(self, objects, value, msg=None):
+        """
+        Asserts that an iterable has a specified number of items.
+        """
+        actual_length = len(objects)
+        if actual_length != value:
+            def truncate_repr(obj):
+                string = " ".join(repr(obj).split())
+                if len(string) > 52:
+                    string = string[:50] + "[...]"
+                return f"{obj.__class__.__qualname__} {string}"
+
+            failure_message = (
+                f"{actual_length} != {value}\n"
+                + f"Object of type {objects.__class__.__qualname__} "
+                + "has the following items:\n"
+                + ", ".join(truncate_repr(item) for item in objects)
+                + ("\n" if msg else "")
+            )
+            self.fail(self._formatMessage(msg, failure_message))
+
     class _AssertNotRaisesContext(_AssertRaisesContext):
         def __exit__(self, exc_type, exc_value, tb):
             if exc_type is not None:
